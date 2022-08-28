@@ -1,0 +1,11 @@
+---
+root: true
+parserOptions:
+  ecmaVersion: 2022
+env:
+  node: true
+extends:
+  - "eslint:recommended"
+  - "plugin:editorconfig/all"
+plugins:
+  - "editorconfig"

@@ -1,0 +1,45 @@
+{
+  "name": "github-management-scripts",
+  "version": "0.0.1",
+  "description": "Keep track of your GitHub profile and organizations",
+  "author": {
+    "name": "Tomer Figenblat",
+    "url": "https://github.com/TomerFi"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://github.com/TomerFi/github-management-scripts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TomerFi/github-management-scripts"
+  },
+  "bugs": {
+    "url": "https://github.com/TomerFi/github-management-scripts/issues"
+  },
+  "keywords": [
+    "github",
+    "management",
+    "aws",
+    "serverless"
+  ],
+  "private": true,
+  "main": "src/handler.js",
+  "engines": {
+    "node": ">= 16.0.0"
+  },
+  "scripts": {
+    "start": "node -e \"require('./src/main.js').handler()\"",
+    "start:dev": "node -r dotenv/config -e \"require('./src/main.js').handler()\"",
+    "lint": "eslint ./src/"
+  },
+  "dependencies": {
+    "@octokit/graphql": "^5.0.1",
+    "aws-sdk": "^2.1204.0",
+    "diff2html": "^3.4.18",
+    "unidiff": "^1.0.2"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.1",
+    "eslint": "^8.23.0",
+    "eslint-plugin-editorconfig": "^4.0.2"
+  }
+}
