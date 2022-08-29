@@ -32,6 +32,9 @@ async function getUserReposInfo(report, repos) {
               }
               diskUsage
               forkCount
+              isArchived
+              isDisabled
+              isEmpty
               isInOrganization
               isPrivate
               name
@@ -101,6 +104,9 @@ async function getUserReposInfo(report, repos) {
         name: edge.node.name,
         diskUsage: edge.node.diskUsage,
         forkCount: edge.node.forkCount,
+        isArchived: edge.node.isArchived,
+        isDisabled: edge.node.isDisabled,
+        isEmpty: edge.node.isEmpty,
         isInOrganization: edge.node.isInOrganization,
         isPrivate: edge.node.isPrivate,
         stargazerCount: edge.node.stargazerCount,

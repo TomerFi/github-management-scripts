@@ -39,6 +39,7 @@ async function getOrganizationReposInfo(org, report, repos) {
               diskUsage
               forkCount
               isArchived
+              isEmpty
               isFork
               isPrivate
               stargazerCount
@@ -105,6 +106,7 @@ async function getOrganizationReposInfo(org, report, repos) {
         diskUsage: edge.node.diskUsage,
         forkCount: edge.node.forkCount,
         isArchived: edge.node.isArchived,
+        isEmpty: edge.node.isEmpty,
         isFork: edge.node.isFork,
         isPrivate: edge.node.isPrivate,
         stargazers: edge.node.stargazerCount,
