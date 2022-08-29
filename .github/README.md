@@ -10,7 +10,7 @@
 <p align="center">
   <br/>
   Running on <em>AWS</em>, triggered by daily scheduled events,<br/>
-  this project collects data about my <em>GitHub</em> profile and organizations I manage,<br/>
+  this project collects data about my <em>GitHub</em> Profile and Organizations I manage,<br/>
   and emails me the diffs.
 </p>
 
@@ -35,7 +35,7 @@
 <details>
   <summary><strong>Environment Variables</strong></summary>
   <p>
-  The following environment variables are required for the app to run:
+  The following environment variables are required for runtime:
 
   ```shell
   GITHUB_PAT="your-github-personal-access-token-goes-here"
@@ -51,9 +51,10 @@
   </details>
 
   <details>
-  <summary>Note these</summary>
+  <summary>Additional Variables</summary>
   <p>
-  These, are probably being handled by your local <em>aws-cli</em> or <em>Lambda</em> environment:
+  These, are probably being handled by your local <em>aws-cli</em> or <em>Lambda</em> environment,<br/>
+  nevertheless, knowing about their existence is mandatory:
 
   ```shell
   AWS_ACCESS_KEY_ID="iam-user-access-key-id-goes-here"
@@ -78,7 +79,7 @@
     <li><a href="#eventbridge">EventBridge</a></li>
   </ul>
 
-  <div id="iam">
+  <div name="iam">
   <p>
   <strong><a href="https://aws.amazon.com/iam/">AWS IAM</a></strong>
   <ul>
@@ -88,7 +89,7 @@
   </p>
   </div>
 
-  <div id="s3">
+  <div name="s3">
   <p>
   <strong><a href="https://aws.amazon.com/s3/">AWS S3</a></strong>
   <ul>
@@ -97,7 +98,7 @@
   </p>
   </div>
 
-  <div id="ses">
+  <div name="ses">
   <p>
   <strong><a href="https://aws.amazon.com/ses/">AWS SES</a></strong>
   <ul>
@@ -107,7 +108,7 @@
   </p>
   </div>
 
-  <div id="lambda">
+  <div name="lambda">
   <p>
   <strong><a href="https://aws.amazon.com/lambda/">AWS Lambda</a></strong>
   <ul>
@@ -137,12 +138,12 @@
     </li>
   </ul>
 
-  <strong>Note, this section is hit twice, come back here after the creating the event.</strong>
+  <strong>Note, this section is hit twice, come back here after the creating the event rule.</strong>
 
   </p>
   </div>
 
-  <div id="cloudwatch">
+  <div name="cloudwatch">
   <p>
   <strong><a href="https://aws.amazon.com/cloudwatch/">AWS CloudWatch</a></strong>
   <ul>
@@ -151,7 +152,7 @@
   </p>
   </div>
 
-  <div id="eventbridge">
+  <div name="eventbridge">
   <p>
   <strong><a href="https://aws.amazon.com/eventbridge/">AWS EventBridge</a></strong>
   <ul>
