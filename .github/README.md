@@ -1,85 +1,165 @@
-# GitHub Management Scripts
+<!-- markdownlint-disable MD033 -->
+<h1 align="center">
+  GitHub Management Scripts
+</h1>
 
-Keep track of your GitHub profile and organizations.</br>
-Running on AWS, triggered by daily scheduled event.
+<h3 align="center">
+  Keep track of your GitHub profile and organizations
+</h3>
 
-```mermaid
-  sequenceDiagram
-    autonumber
-    loop Daily
-      EventBridge->>Lambda: Launches scheduled event
-    end
-    Lambda->>GitHub: Fetches data for creating reports
-    Lambda->>S3: Fetches previous reports
-    Lambda-->>SES: Send email with diffs if found
-```
+<p align="center">
+  <br/>
+  Running on <em>AWS</em>, triggered by daily scheduled events,<br/>
+  this project collects data about my <em>GitHub</em> profile and organizations I manage,<br/>
+  and emails me the diffs.
+</p>
 
-## Environment Variables
+<p align="center">
 
-The following environment variables are required for the app to run:
+  ```mermaid
+    sequenceDiagram
+      autonumber
+      loop daily
+        EventBridge->>Lambda: launches a daily scheduled event
+      end
+      Lambda->>GitHub: fetches data for creating reports
+      Lambda->>S3: fetches previous stored reports
+      opt if found diffs
+        Lambda-->>S3: store the new reports
+        Lambda-->>SES: send an email with diffs
+      end
+  ```
 
-```shell
-GITHUB_PAT="your-github-personal-access-token-goes-here"
-S3_BUCKET_NAME="name-of-s3-bucket-goes-here"
-ORGS_LIST="org-name,another-org-name"
-EMAIL_RECIPIENT="email-to-send-notification-to-goes-here"
-EMAIL_SENDER="email-to-send-mails-from-goes-here"
-AWS_REGION="us-east-1"
-```
+</p>
 
-## AWS Deployment
+<details>
+  <summary><strong>Environment Variables</strong></summary>
+  <p>
+  The following environment variables are required for the app to run:
 
-Instructions for deploying on AWS, the services used are:
+  ```shell
+  GITHUB_PAT="your-github-personal-access-token-goes-here"
+  S3_BUCKET_NAME="name-of-s3-bucket-goes-here"
+  ORGS_LIST="org-name,another-org-name"
+  EMAIL_RECIPIENT="email-to-send-notification-to-goes-here"
+  EMAIL_SENDER="email-to-send-mails-from-goes-here"
+  ```
 
-- IAM
-- Lambda
-- S3
-- SES
-- CloudWatch
-- EventBridge
+  <details>
+  <summary>Token scopes</summary>
+  <p><em>repo, read:packages, admin:org, read:user, read:discussion, read:project</em></p>
+  </details>
 
-### IAM
+  <details>
+  <summary>Note these</summary>
+  <p>
+  These, are probably being handled by your local <em>aws-cli</em> or <em>Lambda</em> environment:
 
-Goto `AWS IAM`:
+  ```shell
+  AWS_ACCESS_KEY_ID="iam-user-access-key-id-goes-here"
+  AWS_SECRET_ACCESS_KEY="iam-user-secret-access-key-goes-here"
+  AWS_REGION="aws-region-goes-here"
+  ```
 
-- Create a service user and attach the `AWSLambda_FullAccess` permissions policy to it, take note of the new user's *access key id* and *secret access key*. We'll use this user's credentials to deploy `Lambda` function from the CI workflows.
+  </p>
+  </details>
+  </p>
+</details>
 
-- Create a `Role` and attach the following policies to it, `AWSLambdaExecute` which includes permission to `CloudWatch` and `S3`, and the `AmazonSESFullAccess` (full access is mandatory). We will use this for our `Lambda` execution for allowing our function to access the rest of services.
+<details>
+  <summary><strong>Deployment Instructions</strong></summary>
+  <p>AWS services used for this project are:</p>
+  <ul>
+    <li><a href="#iam">IAM</a></li>
+    <li><a href="#s3">S3</a></li>
+    <li><a href="#ses">SES</a></li>
+    <li><a href="#lambda">Lambda</a></li>
+    <li><a href="#cloudwatch">CloudWatch</a></li>
+    <li><a href="#eventbridge">EventBridge</a></li>
+  </ul>
 
-### S3
+  <div id="iam">
+  <p>
+  <strong><a href="https://aws.amazon.com/iam/">AWS IAM</a></strong>
+  <ul>
+    <li>Create a service user and attach the <em>AWSLambda_FullAccess</em> permissions policy to it, take note of the new user's <em>access key id</em> and <em>secret access key</em>. We'll use this user's credentials to deploy <em>Lambda</em> function from the CI workflows.</li>
+    <li>Create a <em>Role</em> and attach the following policies to it, <em>AWSLambdaExecute</em> which includes permission to <em>CloudWatch</em> and <em>S3</em>, and the <em>AmazonSESFullAccess</em> (full access is mandatory). We will use this for our <em>Lambda</em> execution for allowing our function to access the rest of the services.</li>
+  </ul>
+  </p>
+  </div>
 
-Goto `AWS S3`, create a bucket.
+  <div id="s3">
+  <p>
+  <strong><a href="https://aws.amazon.com/s3/">AWS S3</a></strong>
+  <ul>
+    <li>Create a bucket for storing the previous reports for comparison, it doesn't have to be a public accessible one. and it's up to you if you want to make it preserve versions.</li>
+  </ul>
+  </p>
+  </div>
 
-### SES
+  <div id="ses">
+  <p>
+  <strong><a href="https://aws.amazon.com/ses/">AWS SES</a></strong>
+  <ul>
+    <li>Configure based on the given instructions, as you see fit, i.e. verify your custom domain and custom from domain if needed.<br/>
+    Make sure to take you service out of the sandbox environment if you want to able to properly send emails.</li>
+  </ul>
+  </p>
+  </div>
 
-Goto `AWS SES` configure as you see fit, i.e. verify your custom domain and custom from domain if needed.</br>
-Make sure to take you service out of the sandbox environment if you want to able to properly send emails.
+  <div id="lambda">
+  <p>
+  <strong><a href="https://aws.amazon.com/lambda/">AWS Lambda</a></strong>
+  <ul>
+    <li>Create a function based on the execution <em>IAM Role</em> you created earlier.</li>
+    <li>Set the handler to <code>src/main.handler</code></li>
+    <li>Set the timeout to 15 seconds.</li>
+    <li>Build the project with <code>npm ci</code></li>
+    <li>Upload a <em>Zip</em> archive containing at the following:
+      <ul>
+        <li><code>src/</code></li>
+        <li><code>node_modules/</code></li>
+      </ul>
+      <small><code>zip -r github-management-scripts.zip src/ node_modules/</code></small>
+    </li>
+    <li>Publish a new version.</li>
+    <li>Create an alias named <code>Live</code> and point it to published version, this will help us maintain versioning for your function, as the triggering event will invoke this alias.<br/>
+    Note, I like also creating a <code>Dev</code> alias that I use while staging, you can take a look at this project's <em>CI</em> workflows.</li>
+    <li>Create the following environment variables for the function's context.<br/>
+    Note that <em>AWS</em> connection-related variables are being handled by <em>Lambda</em>:
+      <ul>
+      <li><code>GITHUB_PAT</code> <em>token scopes: repo, read:packages, admin:org, read:user, read:discussion, read:project</em></li>
+      <li><code>S3_BUCKET_NAME</code> <em>the name of the bucket you created</em></li>
+      <li><code>ORGS_LIST</code> <em>comma separated list of organizations you want to track.</em></li>
+      <li><code>EMAIL_RECIPIENT</code> <em>where to send the diffs to.</em></li>
+      <li><code>EMAIL_SENDER</code> <em>sender email for the diffs email.</em></li>
+      </ul>
+    </li>
+  </ul>
 
-### Lambda
+  <strong>Note, this section is hit twice, come back here after the creating the event.</strong>
 
-Goto `AWS Lambda`:
+  </p>
+  </div>
 
-- Create a function based on the execution `Role` you created earlier.
-- Set the handler to `src/main.handler`.
-- Set the timeout to 15 seconds.
-- Upload a `Zip` archive containing at the root of it:
-  - src/
-  - node_modules/
-- Publish a new version.
-- Create two aliases named `Live` and `Dev` for pointing to their respective function uploads.
-- Create the following environment variable for the function's context (*AWS_REGION* ic created by AWS):
-  - GITHUB_PAT
-  - S3_BUCKET_NAME
-  - ORGS_LIST
-  - EMAIL_RECIPIENT
-  - EMAIL_SENDER
+  <div id="cloudwatch">
+  <p>
+  <strong><a href="https://aws.amazon.com/cloudwatch/">AWS CloudWatch</a></strong>
+  <ul>
+    <li>After the first function invocation, a designated log group will be created, the default retention for it will be *Never Expires*, you can reduce it, 1 week should suffice.</li>
+  </ul>
+  </p>
+  </div>
 
-### CloudWatch
+  <div id="eventbridge">
+  <p>
+  <strong><a href="https://aws.amazon.com/eventbridge/">AWS EventBridge</a></strong>
+  <ul>
+    <li>Create a scheduled rule, for instance <em>0-10-*-*-?-*</em> will run daily at 10AM.</br>
+    Set it to invoke your recently created <em>Lambda</em> function, and select <em>Live</em> as the alias.</br>
+    Get back to the <a href="#lambda">Lambda</a> function, and select the new <em>EventBridge</em> rule you created as th trigger.</li>
+  </ul>
+  </p>
+  </div>
 
-Goto to `AWS CloudWatch`, after the first function invocation, a designated log group will be created, the default retention for it will be *Never Expires*, you can reduce it, 1 week should suffice.
-
-### EventBridge
-
-Goto to `AWS EventBridge`, create a scheduled rule, for instance `0-10-*-*-?-*` will run daily at 10AM.</br>
-Set it to invoke your recently created `Lambda` function, and select `Live` as the alias.</br>
-Go back to `AWS Lambda`, and select the new `EventBridge` rule you created as th trigger.
+</details>
