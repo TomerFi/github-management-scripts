@@ -54,7 +54,7 @@
   <summary>Additional Variables</summary>
   <p>
   These, are probably being handled by your local <em>aws-cli</em> or <em>Lambda</em> environment,<br/>
-  nevertheless, knowing about their existence is mandatory:
+  nevertheless, if you're running this app without <em>Lambda</em>, you need to set these manually:
 
   ```shell
   AWS_ACCESS_KEY_ID="iam-user-access-key-id-goes-here"
