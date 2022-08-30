@@ -4,14 +4,14 @@
 </h1>
 
 <h3 align="center">
-  Keep track of your GitHub profile and organizations
+  Keep track of your GitHub Profile and Organizations
 </h3>
 
 <p align="center">
   <br/>
   Running on <em>AWS</em>, triggered by daily scheduled events,<br/>
-  this project collects data about my <em>GitHub</em> Profile and Organizations I manage,<br/>
-  and emails me the diffs.
+  this project fetches data about the viewer's <em>GitHub</em> Profile and selected Organizations,<br/>
+  compares them to the data stored from the previous run, and emails a diffs report.
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
       Lambda->>S3: fetches previous stored reports
       opt if found diffs
         Lambda-->>S3: store the new reports
-        Lambda-->>SES: send an email with diffs
+        Lambda-->>SES: send an email with a diffs report
       end
   ```
 
