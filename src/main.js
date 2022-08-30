@@ -25,8 +25,8 @@ async function main() {
   if (prevViewerRep) {
     let viewerDiff = getDiff(prevViewerRep, currentViewerRep);
     if (viewerDiff) {
-      await sendEmail(ses, viewerDiff)
-        .then(() => uploadReport(s3, bucketName, VIEWER_KEY, currentViewerRep));
+      await sendEmail(ses, viewerDiff);
+      await uploadReport(s3, bucketName, VIEWER_KEY, currentViewerRep);
     }
   }
 
@@ -39,8 +39,8 @@ async function main() {
       if (prevOrgRep) {
         let orgDiff = getDiff(prevOrgRep, currentOrgRep);
         if(orgDiff) {
-          await sendEmail(ses, orgDiff)
-            .then(() => uploadReport(s3, bucketName, orgKey, currentOrgRep));
+          await sendEmail(ses, orgDiff);
+          await uploadReport(s3, bucketName, orgKey, currentOrgRep);
         }
       }
     });
