@@ -13,14 +13,10 @@ async function getOrganizationReposInfo(org, report, repos) {
   }
   if (!('info' in report)) {
     report.info.repos = 0;
-    report.info.reposDiskUsage = 0;
     report.info.reposTotalStars = 0;
   } else {
     if (!('repos' in report.info)) {
       report.info.repos = 0;
-    }
-    if (!('reposDiskUsage' in report.info)) {
-      report.info.reposDiskUsage = 0;
     }
     if (!('reposTotalStars' in report)) {
       report.info.reposTotalStars = 0;
@@ -36,7 +32,6 @@ async function getOrganizationReposInfo(org, report, repos) {
                 name
               }
               name
-              diskUsage
               forkCount
               isArchived
               isEmpty
@@ -89,7 +84,6 @@ async function getOrganizationReposInfo(org, report, repos) {
             hasNextPage
           }
           totalCount
-          totalDiskUsage
         }
       }
     }
@@ -103,7 +97,6 @@ async function getOrganizationReposInfo(org, report, repos) {
       report.repos.push({
         name: edge.node.name,
         head: edge.node.defaultBranchRef?.name,
-        diskUsage: edge.node.diskUsage,
         forkCount: edge.node.forkCount,
         isArchived: edge.node.isArchived,
         isEmpty: edge.node.isEmpty,
@@ -130,7 +123,6 @@ async function getOrganizationReposInfo(org, report, repos) {
     });
 
   report.info.repos = result.organization.repositories.totalCount;
-  report.info.reposDiskUsage = result.organization.repositories.totalDiskUsage;
 
   if (result.organization.repositories.pageInfo.hasNextPage) {
     return getOrganizationReposInfo(

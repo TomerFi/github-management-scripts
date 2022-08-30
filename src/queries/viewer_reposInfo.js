@@ -14,9 +14,6 @@ async function getUserReposInfo(report, repos) {
   if (!('reposTotal' in report)) {
     report.reposTotal = 0;
   }
-  if (!('reposTotalDiskUsage' in report)) {
-    report.reposTotalDiskUsage = 0;
-  }
   if (!('reposTotalStars' in report)) {
     report.reposTotalStars = 0;
   }
@@ -30,7 +27,6 @@ async function getUserReposInfo(report, repos) {
               defaultBranchRef {
                 name
               }
-              diskUsage
               forkCount
               isArchived
               isDisabled
@@ -88,7 +84,6 @@ async function getUserReposInfo(report, repos) {
             hasNextPage
           }
           totalCount
-          totalDiskUsage
         }
       }
     }
@@ -102,7 +97,6 @@ async function getUserReposInfo(report, repos) {
       report.repos.push({
         head: edge.node.defaultBranchRef?.name,
         name: edge.node.name,
-        diskUsage: edge.node.diskUsage,
         forkCount: edge.node.forkCount,
         isArchived: edge.node.isArchived,
         isDisabled: edge.node.isDisabled,
@@ -131,7 +125,6 @@ async function getUserReposInfo(report, repos) {
     });
 
   report.reposTotal += result.user.repositories.totalCount;
-  report.reposTotalDiskUsage += result.user.repositories.totalDiskUsage;
 
   if (result.user.repositories.pageInfo.hasNextPage) {
     return getUserReposInfo(
