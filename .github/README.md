@@ -47,11 +47,20 @@
 
   <details>
   <summary>Token scopes</summary>
-  <p><em>repo, read:packages, admin:org, read:user, read:discussion, read:project</em></p>
+  <p>
+  <ul>
+    <li>repo</li>
+    <li>read:packages</li>
+    <li>admin:org</li>
+    <li>read:user</li>
+    <li>read:discussion</li>
+    <li>read:project</li>
+  </ul>
+  </p>
   </details>
 
   <details>
-  <summary>Additional Variables</summary>
+  <summary>Additional environment variables</summary>
   <p>
   These, are probably being handled by your local <em>aws-cli</em> or <em>Lambda</em> environment,<br/>
   nevertheless, if you're running this app without <em>Lambda</em>, you need to set these manually:
