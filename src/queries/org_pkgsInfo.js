@@ -1,49 +1,46 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_ORG_PKGS_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_ORG_PKGS_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { PACKAGE_CONNECTION } = require('./fragments.js');
 
-module.exports = wrapper;
+const initialQuery = `#graphql
+  query ($org: String!, $maxPackages: Int!) {
+    organization (login: $org) {
+      packages(first: $maxPackages) {
+        ...packageConnectionFields
+      }
+    }
+  }
+  ${PACKAGE_CONNECTION}
+`;
 
-async function wrapper(org, report) {
-  return getOrganizationPackagesInfo(org, report, `first: ${MAX_ORG_PKGS_FETCH}`);
-}
+const followupQuery = `#graphql
+  query ($org: String!, $maxPackages: Int!, $lastCursor: String!) {
+    organization (login: $org) {
+      packages(first: $maxPackages, after: $lastCursor) {
+        ...packageConnectionFields
+      }
+    }
+  }
+  ${PACKAGE_CONNECTION}
+`;
 
-async function getOrganizationPackagesInfo(org, report, packages) {
+module.exports = getOrganizationPackagesInfo;
+
+async function getOrganizationPackagesInfo(report, query, args) {
   if (!('packages' in report)) {
     report.packages = [];
   }
-  if (!('info' in report)) {
-    report.info.packages = 0;
-  } else {
-    if (!('packages' in report.info)) {
-      report.info.packages = 0;
-    }
-  }
-  let query = `
-    {
-      organization (login: "${org}") {
-        packages(${packages}) {
-          edges {
-            node {
-              name
-              packageType
-              latestVersion {
-                version
-              }
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
-      }
-    }
-  `;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    org: report.login,
+    maxPackages: MAX_ORG_PKGS_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
 
-  result.organization.packages.edges
+
+  response.organization.packages.edges
     .forEach(edge => {
       report.packages.push({
         name: edge.node.name,
@@ -52,13 +49,15 @@ async function getOrganizationPackagesInfo(org, report, packages) {
       });
     });
 
-  report.info.packages = result.organization.packages.totalCount;
+  if (!('packagesTotal' in report)) {
+    report.packagesTotal = response.organization.packages.totalCount;
+  }
 
-  if (result.organization.packages.pageInfo.hasNextPage) {
+  if (response.organization.packages.pageInfo.hasNextPage) {
     return getOrganizationPackagesInfo(
-      org,
       report,
-      `first: ${MAX_ORG_PKGS_FETCH}, after: "${result.organization.packages.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.organization.packages.pageInfo.endCursor });
   }
   return report;
 }

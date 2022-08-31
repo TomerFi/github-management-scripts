@@ -1,7 +1,7 @@
 module.exports = Object.freeze({
   // the required gh token needs the following scopes:
   // repo, read:packages, admin:org, read:user, read:discussion, read:project
-  REQUEST_PARAMS: {
+  REQUEST_HEADERS: {
     headers: {
       authorization: `bearer ${process.env.GITHUB_PAT}`,
     }

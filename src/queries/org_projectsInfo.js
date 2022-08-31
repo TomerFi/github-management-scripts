@@ -1,48 +1,45 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_ORG_PROJECTS_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_ORG_PROJECTS_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { PROJECT_V2_CONNECTION } = require('./fragments.js');
 
-module.exports = wrapper;
+const initialQuery = `#graphql
+  query ($org: String!, $maxProjects: Int!) {
+    organization (login: $org) {
+      projectsV2(first: $maxProjects) {
+        ...projectV2ConnectionFields
+      }
+    }
+  }
+  ${PROJECT_V2_CONNECTION}
+`;
 
-async function wrapper(org, report) {
-  return getOrganizationProjectsInfo(org, report, `first: ${MAX_ORG_PROJECTS_FETCH}`);
-}
+const followupQuery = `#graphql
+  query ($org: String!, $maxProjects: Int!, $lastCursor: String!) {
+    organization (login: $org) {
+      projectsV2(first: $maxProjects, after: $lastCursor) {
+        ...projectV2ConnectionFields
+      }
+    }
+  }
+  ${PROJECT_V2_CONNECTION}
+`;
 
-async function getOrganizationProjectsInfo(org, report, projects) {
+module.exports = getOrganizationProjectsInfo;
+
+async function getOrganizationProjectsInfo(report, query, args) {
   if (!('projects' in report)) {
     report.projects = [];
   }
-  if (!('info' in report)) {
-    report.info.projects = 0;
-  } else {
-    if (!('projects' in report.info)) {
-      report.info.projects = 0;
-    }
-  }
-  let query = `
-    {
-      organization (login: "${org}") {
-        projectsV2(${projects}) {
-          edges {
-            node {
-              closed
-              public
-              title
-              url
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
-      }
-    }
-  `;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    org: report.login,
+    maxProjects: MAX_ORG_PROJECTS_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
 
-  result.organization.projectsV2.edges
+  response.organization.projectsV2.edges
     .forEach(edge => {
       report.projects.push({
         closed: edge.node.closed,
@@ -52,14 +49,15 @@ async function getOrganizationProjectsInfo(org, report, projects) {
       });
     });
 
-  report.info.projects = result.organization.projectsV2.totalCount;
+  if (!('projectsTotal' in report)) {
+    report.projectsTotal = response.organization.projectsV2.totalCount;
+  }
 
-  if (result.organization.projectsV2.pageInfo.hasNextPage) {
-    // eslint-disable-next-line no-undef
-    return getOrganizationPackagesInfo(
-      org,
+  if (response.organization.projectsV2.pageInfo.hasNextPage) {
+    return getOrganizationProjectsInfo(
       report,
-      `first: ${MAX_ORG_PROJECTS_FETCH}, after: "${result.organization.projectsV2.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.organization.projectsV2.pageInfo.endCursor});
   }
   return report;
 }

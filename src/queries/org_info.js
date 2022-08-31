@@ -1,30 +1,19 @@
 const { graphql } = require('@octokit/graphql');
-const { REQUEST_PARAMS } = require('../common.js');
+const { REQUEST_HEADERS } = require('../common.js');
+const { ORGANIZATION } = require('./fragments');
 
-module.exports = wrapper;
-
-async function wrapper(org) {
-  return getOrganizationInfo(org, {});
-}
-
-async function getOrganizationInfo(org, report) {
-  let query = `
-    {
-      organization (login: "${org}") {
-        email
-        isVerified
-        location
-        login
-        name
-        requiresTwoFactorAuthentication
-        url
-      }
+const query = `#graphql
+  query($org: String!) {
+    organization (login: $org) {
+      ...organizationFields
     }
-  `;
+  }
+  ${ORGANIZATION}
+`;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+module.exports = getOrganizationInfo;
 
-  report.info = {...result}
-
-  return report;
+async function getOrganizationInfo(org) {
+  let response = await graphql({query: query, ...REQUEST_HEADERS, org: org});
+  return {...response.organization};
 }
