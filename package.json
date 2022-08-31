@@ -38,7 +38,7 @@
     "unidiff": "^1.0.2"
   },
   "devDependencies": {
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.0.2",
     "eslint": "^8.23.0",
     "eslint-plugin-editorconfig": "^4.0.2"
   }
