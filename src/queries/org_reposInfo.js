@@ -1,134 +1,89 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_ORG_REPOS_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_ORG_REPOS_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { REPOSITORY_CONNECTION } = require('./fragments.js');
 
-module.exports = wrapper;
-
-async function wrapper(org, report) {
-  return getOrganizationReposInfo(org, report, `first: ${MAX_ORG_REPOS_FETCH}`);
-}
-
-async function getOrganizationReposInfo(org, report, repos) {
-  if (!('repos' in report)) {
-    report.repos = [];
-  }
-  if (!('info' in report)) {
-    report.info.repos = 0;
-    report.info.reposTotalStars = 0;
-  } else {
-    if (!('repos' in report.info)) {
-      report.info.repos = 0;
-    }
-    if (!('reposTotalStars' in report)) {
-      report.info.reposTotalStars = 0;
-    }
-  }
-  let query = `
-    {
-      organization (login: "${org}") {
-        repositories(${repos}, ownerAffiliations: OWNER) {
-          edges {
-            node {
-              defaultBranchRef {
-                name
-              }
-              name
-              forkCount
-              isArchived
-              isEmpty
-              isFork
-              isPrivate
-              stargazerCount
-              url
-              webCommitSignoffRequired
-              environments(first: 100) {
-                nodes {
-                  name
-                }
-              }
-              licenseInfo {
-                name
-              }
-              latestRelease {
-                name
-                tagName
-                url
-                reactions(first: 100) {
-                  totalCount
-                }
-              }
-              discussions(first: 100) {
-                totalCount
-              }
-              issues(first: 100, states: OPEN) {
-                totalCount
-              }
-              milestones(first: 100, states: OPEN) {
-                totalCount
-              }
-              packages(first: 100) {
-                totalCount
-              }
-              projectsV2(first: 100) {
-                totalCount
-              }
-              pullRequests(first: 100, states: OPEN) {
-                totalCount
-              }
-              vulnerabilityAlerts(first: 100, states: OPEN) {
-                totalCount
-              }
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
+const initialQuery = `#graphql
+  query ($org: String!, $maxRepositories: Int!) {
+    organization (login: $org) {
+      repositories(first: $maxRepositories, ownerAffiliations: OWNER) {
+        ...repositoryConnectionFields
       }
     }
-  `;
+  }
+  ${REPOSITORY_CONNECTION}
+`;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+const followupQuery = `#graphql
+  query ($org: String!, $maxRepositories: Int!, $lastCursor: String!) {
+    organization (login: $org) {
+      repositories(first: $maxRepositories, ownerAffiliations: OWNER, after: $lastCursor) {
+        ...repositoryConnectionFields
+      }
+    }
+  }
+  ${REPOSITORY_CONNECTION}
+`;
 
-  result.organization.repositories.edges
+module.exports = getOrganizationReposInfo;
+
+async function getOrganizationReposInfo(report, query, args) {
+  if (!('repositories' in report)) {
+    report.repositories = [];
+  }
+  if (!('repositoriesTotalStars' in report)) {
+    report.repositoriesTotalStars = 0;
+  }
+
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    org: report.login,
+    maxRepositories: MAX_ORG_REPOS_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
+
+  response.organization.repositories.edges
     .forEach(edge => {
-      report.info.reposTotalStars += edge.node.stargazerCount;
-      report.repos.push({
-        name: edge.node.name,
+      report.repositoriesTotalStars += edge.node.stargazerCount;
+      report.repositories.push({
         head: edge.node.defaultBranchRef?.name,
         forkCount: edge.node.forkCount,
         isArchived: edge.node.isArchived,
+        isDisabled: edge.node.isDisabled,
         isEmpty: edge.node.isEmpty,
         isFork: edge.node.isFork,
         isPrivate: edge.node.isPrivate,
-        stargazers: edge.node.stargazerCount,
+        name: edge.node.name,
+        stargazersTotal: edge.node.stargazerCount,
         discussions: edge.node.discussions.totalCount,
-        issues: edge.node.issues.totalCount,
-        milestones: edge.node.milestones.totalCount,
-        packages: edge.node.packages.totalCount,
-        projects: edge.node.projectsV2.totalCount,
-        pullRequests: edge.node.pullRequests.totalCount,
-        vulnerabilityAlerts: edge.node.vulnerabilityAlerts.totalCount,
-        url: edge.node.url,
-        webCommitSignoffRequired: edge.node.webCommitSignoffRequired,
         environments: edge.node.environments.nodes.map(n => n.name),
-        license: edge.node?.licenseInfo?.name,
+        issues: edge.node.issues.totalCount,
         latest: {
           name: edge.node.latestRelease?.name ? edge.node.latestRelease.name : edge.node.latestRelease?.tagName,
           url: edge.node.latestRelease?.url,
           reactions: edge.node.latest?.release.reactions.totalCount,
-        }
+        },
+        license: edge.node?.licenseInfo?.name,
+        milestones: edge.node.milestones.totalCount,
+        packages: edge.node.packages.totalCount,
+        projects: edge.node.projectsV2.totalCount,
+        pullRequests: edge.node.pullRequests.totalCount,
+        url: edge.node.url,
+        vulnerabilitiesTotal: edge.node.vulnerabilityAlerts.totalCount,
+        webCommitSignoffRequired: edge.node.webCommitSignoffRequired,
+        watchers: edge.node.watchers.totalCount,
       });
     });
 
-  report.info.repos = result.organization.repositories.totalCount;
+  if (!('repositoriesTotal' in report)) {
+    report.repositoriesTotal = response.organization.repositories.totalCount;
+  }
 
-  if (result.organization.repositories.pageInfo.hasNextPage) {
+  if (response.organization.repositories.pageInfo.hasNextPage) {
     return getOrganizationReposInfo(
-      org,
       report,
-      `first: ${MAX_ORG_REPOS_FETCH}, after: "${result.organization.repositories.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.organization.repositories.pageInfo.endCursor });
   }
   return report;
 }

@@ -8,7 +8,7 @@ module.exports = viewerReportBuilder;
 
 async function viewerReportBuilder() {
   return getViewerInfo()
-    .then(s => getViewerFollowersInfo(s))
-    .then(s => getViewerFollowingInfo(s))
-    .then(s => getViewerReposInfo(s));
+    .then(r => getViewerFollowersInfo(r))
+    .then(r => getViewerFollowingInfo(r))
+    .then(r => getViewerReposInfo(r));
 }

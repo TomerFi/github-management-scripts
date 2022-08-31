@@ -1,19 +1,20 @@
 const { graphql } = require('@octokit/graphql');
-const { REQUEST_PARAMS } = require('../common.js');
+const { REQUEST_HEADERS } = require('../common.js');
+const { USER } = require('./fragments.js');
 
 module.exports = getViewerInfo;
 
 async function getViewerInfo() {
-  let query = `
+  let query = `#graphql
     {
       viewer {
-        name
-        login
+        ...userFields
       }
     }
+    ${USER}
   `;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+  let response = await graphql(query, REQUEST_HEADERS);
 
-  return {...result.viewer}
+  return {...response.viewer}
 }

@@ -1,47 +1,46 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_ORG_TEAMS_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_ORG_TEAMS_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { TEAM_CONNECTION } = require('./fragments.js');
 
-module.exports = wrapper;
+const initialQuery = `#graphql
+  query ($org: String!, $maxTeams: Int!) {
+    organization (login: $org) {
+      teams(first: $maxTeams, rootTeamsOnly: true) {
+        ...teamConnectionFields
+      }
+    }
+  }
+  ${TEAM_CONNECTION}
+`;
 
-async function wrapper(org, report) {
-  return getOrganizationTeamsInfo(org, report, `first: ${MAX_ORG_TEAMS_FETCH}`);
-}
+const followupQuery = `#graphql
+  query ($org: String!, $maxTeams: Int!, $lastCursor: String!) {
+    organization (login: $org) {
+      teams(first: $maxTeams, rootTeamsOnly: true, after: $lastCursor) {
+        ...teamConnectionFields
+      }
+    }
+  }
+  ${TEAM_CONNECTION}
+`;
 
-async function getOrganizationTeamsInfo(org, report, teams) {
+module.exports = getOrganizationTeamsInfo;
+
+async function getOrganizationTeamsInfo(report, query, args) {
   if (!('teams' in report)) {
     report.teams = [];
   }
-  if (!('info' in report)) {
-    report.info.teams = 0;
-  } else {
-    if (!('teams' in report.info)) {
-      report.info.teams = 0;
-    }
-  }
-  let query = `
-    {
-      organization (login: "${org}") {
-        teams(${teams}, rootTeamsOnly: true) {
-          edges {
-            node {
-              name
-              slug
-              url
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
-      }
-    }
-  `;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    org: report.login,
+    maxTeams: MAX_ORG_TEAMS_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
 
-  result.organization.teams.edges
+
+  response.organization.teams.edges
     .forEach(edge => {
       report.teams.push({
         name: edge.node.name,
@@ -50,13 +49,15 @@ async function getOrganizationTeamsInfo(org, report, teams) {
       });
     });
 
-  report.info.teams = result.organization.teams.totalCount;
+  if (!('teamsTotal' in report)) {
+    report.teamsTotal = response.organization.teams.totalCount;
+  }
 
-  if (result.organization.teams.pageInfo.hasNextPage) {
+  if (response.organization.teams.pageInfo.hasNextPage) {
     return getOrganizationTeamsInfo(
-      org,
       report,
-      `first: ${MAX_ORG_TEAMS_FETCH}, after: "${result.organization.teams.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.organization.teams.pageInfo.endCursor });
   }
   return report;
 }

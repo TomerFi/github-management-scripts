@@ -9,6 +9,18 @@ exports.handler = async (_event) => {
   await main();
 }
 
+// check for diffs, email and update report if found
+async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey) {
+  let previousReport = await getReport(s3, bucketName, bucketKey, currentReport);
+  if (previousReport) {
+    let reportsDiff = getDiff(previousReport, currentReport);
+    if (reportsDiff) {
+      await sendEmail(ses, reportsDiff);
+      await uploadReport(s3, bucketName, bucketKey, currentReport);
+    }
+  }
+}
+
 async function main() {
   // environment variables
   const region = `${process.env.AWS_REGION}`;
@@ -21,28 +33,14 @@ async function main() {
 
   // handle viewer report
   let currentViewerRep = await buildViewerReport();
-  let prevViewerRep = await getReport(s3, bucketName, VIEWER_KEY, currentViewerRep);
-  if (prevViewerRep) {
-    let viewerDiff = getDiff(prevViewerRep, currentViewerRep);
-    if (viewerDiff) {
-      await sendEmail(ses, viewerDiff);
-      await uploadReport(s3, bucketName, VIEWER_KEY, currentViewerRep);
-    }
-  }
+  await checkDiffs(s3, ses, currentViewerRep, bucketName, VIEWER_KEY);
 
   // handle org reports
   if(orgsList) {
     orgsList.split(',').forEach(async org => {
-      let orgKey = ORG_KEY_FMT.replace('%s', org.replace('-', '_'));
+      let orgKey = ORG_KEY_FMT.replace('%s', org);
       let currentOrgRep = await buildOrgReport(org);
-      let prevOrgRep = await getReport(s3, bucketName, orgKey, currentOrgRep);
-      if (prevOrgRep) {
-        let orgDiff = getDiff(prevOrgRep, currentOrgRep);
-        if(orgDiff) {
-          await sendEmail(ses, orgDiff);
-          await uploadReport(s3, bucketName, orgKey, currentOrgRep);
-        }
-      }
+      await checkDiffs(s3, ses, currentOrgRep, bucketName, orgKey);
     });
   }
 }

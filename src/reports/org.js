@@ -9,9 +9,9 @@ module.exports = buildOrgReport;
 
 async function buildOrgReport(org) {
   return getOrgInfo(org)
-    .then(s => getOrgMembersInfo(org, s))
-    .then(s => getOrgPkgsInfo(org, s))
-    .then(s => getOrgProjectsInfo(org, s))
-    .then(s => getOrgReposInfo(org, s))
-    .then(s => getOrgTeamsInfo(org, s));
+    .then(r => getOrgMembersInfo(r))
+    .then(r => getOrgPkgsInfo(r))
+    .then(r => getOrgProjectsInfo(r))
+    .then(r => getOrgReposInfo(r))
+    .then(r => getOrgTeamsInfo(r));
 }

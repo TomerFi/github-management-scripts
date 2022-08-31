@@ -1,44 +1,45 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_VIEWER_FOLLOWING_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_VIEWER_FOLLOWING_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { FOLLOWING_CONNECTION } = require('./fragments.js');
 
-module.exports = wrapper;
+const initialQuery = `#graphql
+  query ($login: String!, $maxFollowing: Int!) {
+    user (login: $login) {
+      following(first: $maxFollowing) {
+        ...followingConnectionFields
+      }
+    }
+  }
+  ${FOLLOWING_CONNECTION}
+`;
 
-async function wrapper(report) {
-  return getUserFollowingInfo(report, `first: ${MAX_VIEWER_FOLLOWING_FETCH}`);
-}
+const followupQuery = `#graphql
+  query ($login: String!, $maxFollowing: Int!, $lastCursor: String!) {
+    user (login: $login) {
+      following(first: $maxFollowing, after: $lastCursor) {
+        ...followingConnectionFields
+      }
+    }
+  }
+  ${FOLLOWING_CONNECTION}
+`;
 
-async function getUserFollowingInfo(report, following) {
+module.exports = getUserFollowingInfo;
+
+async function getUserFollowingInfo(report, query, args) {
   if (!('following' in report)) {
     report.following = [];
   }
-  if (!('followingTotal' in report)) {
-    report.followingTotal = 0;
-  }
 
-  let query = `
-    {
-      user (login: "${report.login}") {
-        following(${following}) {
-          edges {
-            node {
-              name
-              login
-              url
-            }
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
-      }
-    }
-  `;
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    login: report.login,
+    maxFollowing: MAX_VIEWER_FOLLOWING_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
 
-  let result = await graphql(query, REQUEST_PARAMS);
-
-  result.user.following.edges
+  response.user.following.edges
     .forEach(edge => {
       report.following.push({
         name: edge.node.name ? edge.node.name: edge.node.login,
@@ -46,12 +47,15 @@ async function getUserFollowingInfo(report, following) {
       });
     });
 
-  report.followingTotal += result.user.following.totalCount;
+  if (!('followingTotal' in report)) {
+    report.followingTotal = response.user.following.totalCount;
+  }
 
-  if (result.user.following.pageInfo.hasNextPage) {
+  if (response.user.following.pageInfo.hasNextPage) {
     return getUserFollowingInfo(
       report,
-      `first: ${MAX_VIEWER_FOLLOWING_FETCH}, after: "${result.user.following.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.user.following.pageInfo.endCursor });
   }
   return report;
 }

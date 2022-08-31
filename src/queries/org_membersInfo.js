@@ -1,48 +1,45 @@
 const { graphql } = require('@octokit/graphql');
-const { MAX_ORG_MEMBERS_FETCH, REQUEST_PARAMS } = require('../common.js');
+const { MAX_ORG_MEMBERS_FETCH, REQUEST_HEADERS } = require('../common.js');
+const { ORGANIZATION_MEMBER_CONNECTION } = require('./fragments.js')
 
-module.exports = wrapper;
+const initialQuery = `#graphql
+  query ($org: String!, $maxMembers: Int!) {
+    organization (login: $org) {
+      membersWithRole(first: $maxMembers) {
+        ...organizationMemberConnectionFields
+      }
+    }
+  }
+  ${ORGANIZATION_MEMBER_CONNECTION}
+`;
 
-async function wrapper(org, report) {
-  return getOrganizationMembersInfo(org, report, `first: ${MAX_ORG_MEMBERS_FETCH}`);
-}
+const followupQuery = `#graphql
+  query ($org: String!, $maxMembers: Int!, $lastCursor: String!) {
+    organization (login: $org) {
+      membersWithRole(first: $maxMembers, after: $lastCursor) {
+        ...organizationMemberConnectionFields
+      }
+    }
+  }
+  ${ORGANIZATION_MEMBER_CONNECTION}
+`;
 
-async function getOrganizationMembersInfo(org, report, members) {
+module.exports = getOrganizationMembersInfo;
+
+async function getOrganizationMembersInfo(report, query, args) {
   if (!('members' in report)) {
     report.members = [];
   }
-  if (!('info' in report)) {
-    report.info.members = 0;
-  } else {
-    if (!('members' in report.info)) {
-      report.info.members = 0;
-    }
-  }
-  let query = `
-    {
-      organization (login: "${org}") {
-        membersWithRole(${members}) {
-          edges {
-            hasTwoFactorEnabled
-            node {
-              name
-              url
-            }
-            role
-          }
-          pageInfo {
-            endCursor
-            hasNextPage
-          }
-          totalCount
-        }
-      }
-    }
-  `;
 
-  let result = await graphql(query, REQUEST_PARAMS);
+  let response = await graphql({
+    query: query ? query : initialQuery,
+    org: report.login,
+    maxMembers: MAX_ORG_MEMBERS_FETCH,
+    ...args,
+    ...REQUEST_HEADERS,
+  });
 
-  result.organization.membersWithRole.edges
+  response.organization.membersWithRole.edges
     .forEach(edge => {
       report.members.push({
         name: edge.node.name,
@@ -52,13 +49,15 @@ async function getOrganizationMembersInfo(org, report, members) {
       });
     });
 
-  report.info.members += result.organization.membersWithRole.totalCount;
+  if (!('membersTotal' in report)) {
+    report.membersTotal = response.organization.membersWithRole.totalCount;
+  }
 
-  if (result.organization.membersWithRole.pageInfo.hasNextPage) {
+  if (response.organization.membersWithRole.pageInfo.hasNextPage) {
     return getOrganizationMembersInfo(
-      org,
       report,
-      `first: ${MAX_ORG_MEMBERS_FETCH}, after: "${result.organization.membersWithRole.pageInfo.endCursor}"`)
+      followupQuery,
+      { lastCursor: response.organization.membersWithRole.pageInfo.endCursor });
   }
   return report;
 }
