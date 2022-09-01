@@ -2,13 +2,13 @@ const { html } = require('diff2html');
 const { diffLines, formatLines } = require('unidiff');
 const { DEFAULT_CHARSET, EMAIL_TOPIC } = require('./common.js');
 
-module.exports = {
-  createEmail: createEmail,
-  getDiff: getDiff,
-  getReport: getReport,
-  sendEmail: sendEmail,
-  uploadReport: uploadReport
-}
+module.exports = Object.freeze({
+  createEmail,
+  getDiff,
+  getReport,
+  sendEmail,
+  uploadReport,
+});
 
 // construct an html-body email object
 function createEmail(bodyHtml) {

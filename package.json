@@ -22,13 +22,13 @@
     "serverless"
   ],
   "private": true,
-  "main": "src/handler.js",
+  "main": "src/main.js",
   "engines": {
     "node": ">= 16.0.0"
   },
   "scripts": {
-    "start": "node -e \"require('./src/main.js').handler()\"",
-    "start:dev": "node -r dotenv/config -e \"require('./src/main.js').handler()\"",
+    "start": "node -e \"require('./src/main.js')()\"",
+    "start:dev": "node -r dotenv/config -e \"require('./src/main.js')()\"",
     "lint": "eslint ./src/"
   },
   "dependencies": {

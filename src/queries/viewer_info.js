@@ -2,9 +2,7 @@ const { graphql } = require('@octokit/graphql');
 const { REQUEST_HEADERS } = require('../common.js');
 const { USER } = require('./fragments.js');
 
-module.exports = getViewerInfo;
-
-async function getViewerInfo() {
+module.exports = async function() {
   let query = `#graphql
     {
       viewer {

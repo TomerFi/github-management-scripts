@@ -11,9 +11,7 @@ const query = `#graphql
   ${ORGANIZATION}
 `;
 
-module.exports = getOrganizationInfo;
-
-async function getOrganizationInfo(org) {
+module.exports = async function(org) {
   let response = await graphql({query: query, ...REQUEST_HEADERS, org: org});
   return {...response.organization};
 }

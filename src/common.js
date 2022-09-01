@@ -10,7 +10,7 @@ module.exports = Object.freeze({
   // these can be tweaked if gh api timeouts pop, max items allowed by gh is 100
   MAX_VIEWER_FOLLOWERS_FETCH: 100,
   MAX_VIEWER_FOLLOWING_FETCH: 100,
-  MAX_VIEWER_REPOS_FETCH: 100,
+  MAX_VIEWER_REPOS_FETCH: 60,
   MAX_ORG_MEMBERS_FETCH: 20,
   MAX_ORG_PKGS_FETCH: 20,
   MAX_ORG_PROJECTS_FETCH: 20,

@@ -5,9 +5,7 @@ const getOrgProjectsInfo = require('../queries/org_projectsInfo.js');
 const getOrgReposInfo = require('../queries/org_reposInfo.js');
 const getOrgTeamsInfo = require('../queries/org_teamsInfo.js');
 
-module.exports = buildOrgReport;
-
-async function buildOrgReport(org) {
+module.exports = async function(org) {
   return getOrgInfo(org)
     .then(r => getOrgMembersInfo(r))
     .then(r => getOrgPkgsInfo(r))
