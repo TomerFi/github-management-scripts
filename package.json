@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@octokit/graphql": "^5.0.1",
-    "aws-sdk": "^2.1208.0",
+    "aws-sdk": "^2.1209.0",
     "diff2html": "^3.4.18",
     "unidiff": "^1.0.2"
   },
