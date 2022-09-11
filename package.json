@@ -27,8 +27,8 @@
     "node": ">= 16.0.0"
   },
   "scripts": {
-    "start": "node -e \"require('./src/main.js')()\"",
-    "start:dev": "node -r dotenv/config -e \"require('./src/main.js')()\"",
+    "start": "node -e \"require('./src/main.js').handler()\"",
+    "start:dev": "node -r dotenv/config -e \"require('./src/main.js').handler()\"",
     "lint": "eslint ./src/"
   },
   "dependencies": {
