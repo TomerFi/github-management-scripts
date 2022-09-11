@@ -5,7 +5,7 @@ const buildViewerReport = require('./reports/viewer.js');
 const buildOrgReport = require('./reports/org.js');
 
 // eslint-disable-next-line no-unused-vars
-module.exports = async _event => {
+module.exports.handler = async _event => {
   await main();
 }
 
