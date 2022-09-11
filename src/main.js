@@ -15,8 +15,11 @@ async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey) {
   if (previousReport) {
     let reportsDiff = getDiff(previousReport, currentReport);
     if (reportsDiff) {
+      console.info('found diffs')
       await sendEmail(ses, reportsDiff);
       await uploadReport(s3, bucketName, bucketKey, currentReport);
+    } else {
+      console.info('none found')
     }
   }
 }
@@ -38,6 +41,7 @@ async function main() {
 
   // handle viewer report
   let currentViewerRep = await buildViewerReport();
+  console.info('checking for diffs')
   await checkDiffs(s3, ses, currentViewerRep, bucketName, VIEWER_KEY);
 
   // handle org reports
@@ -45,6 +49,7 @@ async function main() {
     orgsList.split(',').forEach(async org => {
       let orgKey = ORG_KEY_FMT.replace('%s', org);
       let currentOrgRep = await buildOrgReport(org);
+      console.info('checking for diffs')
       await checkDiffs(s3, ses, currentOrgRep, bucketName, orgKey);
     });
   }
