@@ -12,6 +12,7 @@ const query = `#graphql
 `;
 
 module.exports = async function(org) {
+  console.info(`appending ${org} info`);
   let response = await graphql({query: query, ...REQUEST_HEADERS, org: org});
   return {...response.organization};
 }

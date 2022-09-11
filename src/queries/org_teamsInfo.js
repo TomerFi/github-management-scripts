@@ -24,7 +24,10 @@ const followupQuery = `#graphql
   ${TEAM_CONNECTION}
 `;
 
-module.exports = getOrganizationTeamsInfo;
+module.exports = async function(report) {
+  console.info(`appending ${report.login} teams info`);
+  return getOrganizationTeamsInfo(report);
+};
 
 async function getOrganizationTeamsInfo(report, query, args) {
   if (!('teams' in report)) {

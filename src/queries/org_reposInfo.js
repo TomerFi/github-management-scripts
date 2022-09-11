@@ -24,7 +24,10 @@ const followupQuery = `#graphql
   ${REPOSITORY_CONNECTION}
 `;
 
-module.exports = getOrganizationReposInfo;
+module.exports = async function(report) {
+  console.info(`appending ${report.login} repositories info`);
+  return getOrganizationReposInfo(report);
+};
 
 async function getOrganizationReposInfo(report, query, args) {
   if (!('repositories' in report)) {

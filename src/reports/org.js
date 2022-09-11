@@ -6,10 +6,12 @@ const getOrgReposInfo = require('../queries/org_reposInfo.js');
 const getOrgTeamsInfo = require('../queries/org_teamsInfo.js');
 
 module.exports = async function(org) {
+  console.info(`building ${org} report`);
   return getOrgInfo(org)
     .then(r => getOrgMembersInfo(r))
     .then(r => getOrgPkgsInfo(r))
     .then(r => getOrgProjectsInfo(r))
     .then(r => getOrgReposInfo(r))
-    .then(r => getOrgTeamsInfo(r));
+    .then(r => getOrgTeamsInfo(r))
+    .catch(e => console.error(e));
 }

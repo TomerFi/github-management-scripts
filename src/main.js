@@ -22,6 +22,11 @@ async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey) {
 }
 
 async function main() {
+  if (!['GITHUB_PAT', 'S3_BUCKET_NAME', 'ORGS_LIST', 'EMAIL_RECIPIENT', 'EMAIL_SENDER'].every(ev => ev in process.env)) {
+    console.error('missing required environment variables');
+    return;
+  }
+
   // environment variables
   const region = `${process.env.AWS_REGION}`;
   const bucketName = `${process.env.S3_BUCKET_NAME}`;

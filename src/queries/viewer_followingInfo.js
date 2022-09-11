@@ -24,7 +24,10 @@ const followupQuery = `#graphql
   ${FOLLOWING_CONNECTION}
 `;
 
-module.exports = getUserFollowingInfo;
+module.exports = async function(report) {
+  console.info('appending viewer following info');
+  return getUserFollowingInfo(report);
+}
 
 async function getUserFollowingInfo(report, query, args) {
   if (!('following' in report)) {

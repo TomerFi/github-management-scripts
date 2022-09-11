@@ -24,7 +24,10 @@ const followupQuery = `#graphql
   ${PROJECT_V2_CONNECTION}
 `;
 
-module.exports = getOrganizationProjectsInfo;
+module.exports = async function(report) {
+  console.info(`appending ${report.login} projects info`);
+  return getOrganizationProjectsInfo(report);
+};
 
 async function getOrganizationProjectsInfo(report, query, args) {
   if (!('projects' in report)) {

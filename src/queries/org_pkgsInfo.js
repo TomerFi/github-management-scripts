@@ -24,7 +24,10 @@ const followupQuery = `#graphql
   ${PACKAGE_CONNECTION}
 `;
 
-module.exports = getOrganizationPackagesInfo;
+module.exports = async function(report) {
+  console.info(`appending ${report.login} packages info`);
+  return getOrganizationPackagesInfo(report);
+}
 
 async function getOrganizationPackagesInfo(report, query, args) {
   if (!('packages' in report)) {
