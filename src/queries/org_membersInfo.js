@@ -24,7 +24,7 @@ const followupQuery = `#graphql
   ${ORGANIZATION_MEMBER_CONNECTION}
 `;
 
-module.exports = async function (report) {
+module.exports = async function(report) {
   console.info(`appending ${report.login} members info`);
   return getOrganizationMembersInfo(report);
 }

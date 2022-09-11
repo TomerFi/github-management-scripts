@@ -123,7 +123,7 @@
   <ul>
     <li>Create a function based on the execution <em>IAM Role</em> you created earlier.</li>
     <li>Set the handler to <code>src/main.handler</code></li>
-    <li>Set the timeout to 15 seconds.</li>
+    <li>Set the timeout to at least a minute, depending on how many items you are fetching.</li>
     <li>Build the project with <code>npm ci</code></li>
     <li>Upload a <em>Zip</em> archive containing at the following:
       <ul>
