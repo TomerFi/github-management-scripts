@@ -18,7 +18,7 @@ module.exports = Object.freeze({
   MAX_ORG_TEAMS_FETCH: 20,
   // content-related
   DEFAULT_CHARSET: 'UTF-8',
-  EMAIL_TOPIC: 'Hello from github-management-scripts',
+  EMAIL_TOPIC_PREFIX: 'Found diffs for',
   // bucket keys
   VIEWER_KEY: 'viewer.json',
   ORG_KEY_FMT: 'org_%s.json',

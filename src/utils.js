@@ -1,6 +1,6 @@
 const { html } = require('diff2html');
 const { diffLines, formatLines } = require('unidiff');
-const { DEFAULT_CHARSET, EMAIL_TOPIC } = require('./common.js');
+const DEFAULT_CHARSET = require('./common.js');
 
 module.exports = Object.freeze({
   createEmail,
@@ -11,7 +11,7 @@ module.exports = Object.freeze({
 });
 
 // construct an html-body email object
-function createEmail(bodyHtml) {
+function createEmail(title, bodyHtml) {
   return {
     Destination: {
       ToAddresses: [`${process.env.EMAIL_RECIPIENT}`]
@@ -19,7 +19,7 @@ function createEmail(bodyHtml) {
     Message: {
       Subject: {
         Charset: DEFAULT_CHARSET,
-        Data: EMAIL_TOPIC
+        Data: title
       },
       Body: {
         Html: {
@@ -61,13 +61,21 @@ async function getReport(s3, bucket, key, newReport) {
 
 // get diff between a previous report and a current report
 function getDiff(previousReport, currentReport) {
-  let diffs = diffLines(previousReport, JSON.stringify(currentReport, null, 2))
-  if(diffs.length > 0) {
-    return html(formatLines(diffs));
+  try {
+    let diffs = diffLines(previousReport, JSON.stringify(currentReport, null, 2))
+    if(diffs.length > 0) {
+      return html(formatLines(diffs));
+    }
+  } catch (e) {
+    if ('e.split is not a function' === e.message) {
+      // workaround: 'diffLines' fails when no diffs found
+      return;
+    }
+    else throw e;
   }
 }
 
 // send an email with the diff
-async function sendEmail(ses, diff) {
-  return ses.sendEmail(createEmail(diff)).promise();
+async function sendEmail(ses, title, diff) {
+  return ses.sendEmail(createEmail(title, diff)).promise();
 }

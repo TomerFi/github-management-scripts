@@ -1,17 +1,17 @@
-const getOrgInfo = require('../queries/org_info.js');
-const getOrgMembersInfo = require('../queries/org_membersInfo.js');
-const getOrgPkgsInfo = require('../queries/org_pkgsInfo.js');
-const getOrgProjectsInfo = require('../queries/org_projectsInfo.js');
-const getOrgReposInfo = require('../queries/org_reposInfo.js');
-const getOrgTeamsInfo = require('../queries/org_teamsInfo.js');
+const startOrgReport = require('../queries/org_info.js');
+const appendOrgMembersInfo = require('../queries/org_membersInfo.js');
+const appendOrgPkgsInfo = require('../queries/org_pkgsInfo.js');
+const appendOrgProjectsInfo = require('../queries/org_projectsInfo.js');
+const appendOrgReposInfo = require('../queries/org_reposInfo.js');
+const appendOrgTeamsInfo = require('../queries/org_teamsInfo.js');
 
 module.exports = async function(org) {
-  console.info(`building ${org} report`);
-  return getOrgInfo(org)
-    .then(r => getOrgMembersInfo(r))
-    .then(r => getOrgPkgsInfo(r))
-    .then(r => getOrgProjectsInfo(r))
-    .then(r => getOrgReposInfo(r))
-    .then(r => getOrgTeamsInfo(r))
+  console.info(`starting ${org} report`);
+  return startOrgReport(org)
+    .then(r => appendOrgMembersInfo(r))
+    .then(r => appendOrgPkgsInfo(r))
+    .then(r => appendOrgProjectsInfo(r))
+    .then(r => appendOrgReposInfo(r))
+    .then(r => appendOrgTeamsInfo(r))
     .catch(e => console.error(e));
 }

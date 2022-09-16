@@ -26,7 +26,7 @@ const followupQuery = `#graphql
 
 
 module.exports = async function(report) {
-  console.info('appending viewer repositories info');
+  console.info('viewer report - appending repositories info');
   return getUserReposInfo(report);
 }
 

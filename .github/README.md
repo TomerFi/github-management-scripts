@@ -33,7 +33,7 @@
 </p>
 
 <details>
-  <summary><strong>Environment Variables</strong></summary>
+  <summary><strong>Environment variables</strong></summary>
   <p>
   The following environment variables are required for runtime:
 
@@ -77,7 +77,7 @@
 </details>
 
 <details>
-  <summary><strong>Deployment Instructions</strong></summary>
+  <summary><strong>Deployment instructions</strong></summary>
   <p>AWS services used for this project are:</p>
   <ul>
     <li><a href="#iam">IAM</a></li>
@@ -172,4 +172,13 @@
   </p>
   </div>
 
+</details>
+
+<details>
+  <summary><strong>Invoke deployment from local</strong></summary>
+  <ul>
+    <li>Create a file named <code>.env</code> at the project's root and populate it with your environment variables</li>
+    <li>Run <code>npm install</code> for installing all the dev dependencies</li>
+    <li>Run <code>npm run start:dev</code> to run the application with your environment variables</li>
+  </ul>
 </details>

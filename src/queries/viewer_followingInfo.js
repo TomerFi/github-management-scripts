@@ -25,7 +25,7 @@ const followupQuery = `#graphql
 `;
 
 module.exports = async function(report) {
-  console.info('appending viewer following info');
+  console.info('viewer report - appending following info');
   return getUserFollowingInfo(report);
 }
 

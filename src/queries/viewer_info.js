@@ -3,7 +3,7 @@ const { REQUEST_HEADERS } = require('../common.js');
 const { USER } = require('./fragments.js');
 
 module.exports = async function() {
-  console.info('appending viewer info');
+  console.info('viewer report - appending viewer info');
   let query = `#graphql
     {
       viewer {

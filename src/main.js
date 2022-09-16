@@ -1,5 +1,5 @@
 const { S3, SES } = require('aws-sdk');
-const { VIEWER_KEY, ORG_KEY_FMT } = require('./common.js')
+const { EMAIL_TOPIC_PREFIX, VIEWER_KEY, ORG_KEY_FMT } = require('./common.js')
 const { getDiff, getReport, sendEmail, uploadReport } = require('./utils.js');
 const buildViewerReport = require('./reports/viewer.js');
 const buildOrgReport = require('./reports/org.js');
@@ -10,17 +10,25 @@ module.exports.handler = async _event => {
 }
 
 // check for diffs, email and update report if found
-async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey) {
+async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey, isOrg) {
+  let title = 'viewer';
+  if (isOrg) {
+    title = currentReport.login;
+  }
+  console.info(`${title} report - fetching previous report`);
   let previousReport = await getReport(s3, bucketName, bucketKey, currentReport);
   if (previousReport) {
+    console.info(`${title} report - checking for diffs`);
     let reportsDiff = getDiff(previousReport, currentReport);
     if (reportsDiff) {
-      console.info('found diffs')
-      await sendEmail(ses, reportsDiff);
+      console.info(`${title} report - found diffs`);
+      await sendEmail(ses, `${EMAIL_TOPIC_PREFIX} ${title}` , reportsDiff);
       await uploadReport(s3, bucketName, bucketKey, currentReport);
     } else {
-      console.info('none found')
+      console.info(`${title} report - no diffs found`);
     }
+  } else {
+    console.info(`${title} report - no previous report found`);
   }
 }
 
@@ -39,18 +47,19 @@ async function main() {
   const s3 = new S3({apiVersion: '2006-03-01', region: region});
   const ses = new SES({apiVersion: '2010-12-01', region: region});
 
+  let reports = [];
+
   // handle viewer report
-  let currentViewerRep = await buildViewerReport();
-  console.info('checking for diffs')
-  await checkDiffs(s3, ses, currentViewerRep, bucketName, VIEWER_KEY);
+  reports.push(buildViewerReport().then(currentViewerRep => checkDiffs(s3, ses, currentViewerRep, bucketName, VIEWER_KEY)));
 
   // handle org reports
   if(orgsList) {
     orgsList.split(',').forEach(async org => {
       let orgKey = ORG_KEY_FMT.replace('%s', org);
-      let currentOrgRep = await buildOrgReport(org);
-      console.info('checking for diffs')
-      await checkDiffs(s3, ses, currentOrgRep, bucketName, orgKey);
+      reports.push(buildOrgReport(org).then(currentOrgRep => checkDiffs(s3, ses, currentOrgRep, bucketName, orgKey, true)));
     });
   }
+
+  // wait for reports
+  await Promise.allSettled(reports);
 }
