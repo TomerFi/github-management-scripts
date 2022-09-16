@@ -177,8 +177,8 @@
 <details>
   <summary><strong>Invoke deployment from local</strong></summary>
   <ul>
-    <li>Create a file named <code>.env</code> at the project's root and populate it with your environment variables</li>
-    <li>Run <code>npm install</code> for installing all the dev dependencies</li>
-    <li>Run <code>npm run start:dev</code> to run the application with your environment variables</li>
+    <li>Create a file named <code>.env</code> at the project's root with the required environment variables</li>
+    <li>Install all dependencies with <code>npm install</code></li>
+    <li>Run the application with <code>npm run start:dev</code></li>
   </ul>
 </details>
