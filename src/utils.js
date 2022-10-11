@@ -1,6 +1,6 @@
 const { html } = require('diff2html');
 const { diffLines, formatLines } = require('unidiff');
-const DEFAULT_CHARSET = require('./common.js');
+const { DEFAULT_CHARSET } = require('./common.js');
 
 module.exports = Object.freeze({
   createEmail,
@@ -54,7 +54,7 @@ async function getReport(s3, bucket, key, newReport) {
       await uploadReport(s3, bucket, key, newReport);
       return;
     } else {
-      return e;
+      throw e;
     }
   }
 }

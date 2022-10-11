@@ -23,7 +23,9 @@ async function checkDiffs(s3, ses, currentReport, bucketName, bucketKey, isOrg) 
     if (reportsDiff) {
       console.info(`${title} report - found diffs`);
       await sendEmail(ses, `${EMAIL_TOPIC_PREFIX} ${title}` , reportsDiff);
+      console.info(`${title} report - diffs email sent`);
       await uploadReport(s3, bucketName, bucketKey, currentReport);
+      console.info(`${title} report - new report uploaded`);
     } else {
       console.info(`${title} report - no diffs found`);
     }
