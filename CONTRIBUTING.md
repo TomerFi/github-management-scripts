@@ -7,7 +7,7 @@
 - Commit your changes
 - Create a pull request against the `main` branch
 
-## Project walk through
+## Project walkthrough
 
 This project uses [GitHub GraphQL API](https://docs.github.com/en/graphql) to produce two types of reports, a *viewer*
 report produced for the invoking user, and an *org* report produced multiple times per organization configured.<br/>
