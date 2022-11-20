@@ -1,6 +1,7 @@
 const { html } = require('diff2html');
-const { diffLines, formatLines } = require('unidiff');
+const { createPatch } = require('diff')
 const { DEFAULT_CHARSET } = require('./common.js');
+const { EOL } = require('os');
 
 module.exports = Object.freeze({
   createEmail,
@@ -48,7 +49,7 @@ async function uploadReport(s3, bucket, key, report) {
 async function getReport(s3, bucket, key, newReport) {
   try {
     let prevReportObj = await s3.getObject({Bucket: bucket, Key: key}).promise();
-    return prevReportObj.Body.toString(DEFAULT_CHARSET);
+    return JSON.parse(prevReportObj.Body.toString(DEFAULT_CHARSET));
   } catch (e) {
     if (e.name === 'NoSuchKey') {
       await uploadReport(s3, bucket, key, newReport);
@@ -59,20 +60,18 @@ async function getReport(s3, bucket, key, newReport) {
   }
 }
 
-// get diff between a previous report and a current report
-function getDiff(previousReport, currentReport) {
-  try {
-    let diffs = diffLines(previousReport, JSON.stringify(currentReport, null, 2))
-    if(diffs.length > 0) {
-      return html(formatLines(diffs));
-    }
-  } catch (e) {
-    if ('e.split is not a function' === e.message) {
-      // workaround: 'diffLines' fails when no diffs found
-      return;
-    }
-    else throw e;
+// get html diff between a previous report and a current report
+function getDiff(filename, previous, current) {
+  let patch = createPatch(`${filename}.json`, previous, current);
+  let report = html(patch, { drawFileList: false, renderNothingWhenEmpty: true });
+  if (report.trim().split(EOL).length < 4) {
+    // empty report returned (for reference):
+    // <div class="d2h-wrapper">
+    //
+    // </div>
+    return;
   }
+  return report;
 }
 
 // send an email with the diff
