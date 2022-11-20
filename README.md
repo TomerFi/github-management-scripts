@@ -175,7 +175,7 @@
 </details>
 
 <details>
-  <summary><strong>Invoke deployment from local</strong></summary>
+  <summary><strong>Run locally</strong></summary>
   <ul>
     <li>Create a file named <code>.env</code> at the project's root with the required environment variables</li>
     <li>Install all dependencies with <code>npm install</code></li>
