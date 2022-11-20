@@ -1,4 +1,5 @@
 node_modules
+play
 .vscode
 .env
 deploy.sh
