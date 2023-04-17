@@ -35,7 +35,7 @@
     "@octokit/graphql": "^5.0.5",
     "aws-sdk": "^2.1358.0",
     "diff": "^5.1.0",
-    "diff2html": "^3.4.34"
+    "diff2html": "^3.4.35"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",
