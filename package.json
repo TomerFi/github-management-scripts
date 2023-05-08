@@ -40,6 +40,6 @@
   "devDependencies": {
     "dotenv": "^16.0.3",
     "eslint": "^8.39.0",
-    "eslint-plugin-editorconfig": "^4.0.2"
+    "eslint-plugin-editorconfig": "^4.0.3"
   }
 }
