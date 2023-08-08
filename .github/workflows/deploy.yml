@@ -37,7 +37,7 @@ jobs:
         id: bumper
         run: |
           newVersion=$(npm version patch --no-git-tag-version | sed 's/v//g')
-          echo '::set-output name=new_version::'"$newVersion"
+          echo "new_version=$newVersion" >> $GITHUB_OUTPUT
 
       - name: Install project modules
         run: npm ci --production
@@ -49,7 +49,7 @@ jobs:
         id: function_state
         run: |
           state=$(aws lambda get-function --function-name ${{ secrets.LAMBDA_FUNCTION }} --query 'Configuration.State' --output text)
-          echo '::set-output name=state::'"$state"
+          echo "state=$state" >> $GITHUB_OUTPUT
 
       - name: Verify function is in active state
         if: steps.function_state.outputs.state != 'Active'
@@ -71,7 +71,7 @@ jobs:
         run: |
           set -o pipefail
           function_version=$(aws lambda publish-version --function-name ${{ secrets.LAMBDA_FUNCTION }} | jq -r ".Version")
-          echo '::set-output name=function_version::'"$function_version"
+          echo "function_version=$function_version" >> $GITHUB_OUTPUT
 
       - name: Update alias Live with new function version
         run: >
