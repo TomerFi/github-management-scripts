@@ -182,3 +182,21 @@
     <li>Run the application with <code>npm run start:dev</code></li>
   </ul>
 </details>
+
+<p align="left">
+<strong>Our contributors </strong><a href="https://allcontributors.org/docs/en/emoji-key"><em>emoji keys</em></a><br/>
+<img alt="all-contributors" src="https://img.shields.io/github/all-contributors/tomerfi/github-management-scripts?color=ee8449&style=flat-square">
+<br/>
+<div align="left">
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+</div>
+</p>
