@@ -182,28 +182,3 @@
     <li>Run the application with <code>npm run start:dev</code></li>
   </ul>
 </details>
-
-<p align="left">
-<strong>Our contributors </strong><a href="https://allcontributors.org/docs/en/emoji-key"><em>emoji keys</em></a><br/>
-<img alt="all-contributors" src="https://img.shields.io/github/all-contributors/tomerfi/github-management-scripts?color=ee8449&style=flat-square">
-<br/>
-<div align="left">
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="http://altmascinco.wordpress.com"><img src="https://avatars.githubusercontent.com/u/1054618?v=4?s=100" width="100px;" alt="Jorge Vallecillo"/><br /><sub><b>Jorge Vallecillo</b></sub></a><br /><a href="#infra-altmas5" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-</div>
-</p>
